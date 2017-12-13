@@ -17,17 +17,25 @@ def resultado_global(request):
     Porcentaje de votos nulos
     Total de votos de la elección
     """
-    print request.user
-    context={
-        
-    }
-    context['distritos'] = Distrito.objects.all()
+    
     #TODO TU CODIGO AQUI
-    votosTotales = Votos.objects.all().count()
 
-    return render(request,'global.html',context)
+    votos_candidatos = Candidato.objects.all().order_by('-votos_totales')
+    candidato = Candidato.objects.all()
+    voto = Voto.objects.all()
+    distrito = Distrito.objects.all()
+    porcentaje_nulos = Voto.objects.filter(candidato = candidato, valido = False).count() * 100 / Voto.objects.count()
+    votos_nulos = Voto.objects.filter(candidato = candidato, valido = False).count()
+    total = Voto.objects.count()
 
-def resultado_distrital(request):
+    for candidato in votos_candidatos:
+        candidato.votos_totales = Voto.objects.filter(candidato = candidato, valido = True).count()
+        candidato.porcentaje_votos = Voto.objects.filter(candidato = candidato, valido = True).count() * 100 / Voto.objects.count()
+        candidato.save()
+    return render(request,'global.html', {'candidato':candidato, 'votos_candidatos':votos_candidatos, 'voto':voto, 'distritos':distrito, 'porcentaje_nulos':porcentaje_nulos, 'votos_nulos':votos_nulos, 'total':total})
+
+
+def distrital(request, id_distrito):
     """
     Generar la vista para devolver el resultado distrital de la elección
     Tener en cuenta que tiene que tener:
@@ -36,8 +44,14 @@ def resultado_distrital(request):
     Total de votos del distrito
     Candidato ganador
     """
-    context={}
 
     #TODO TU CODIGO AQUI
 
-    return render(request,'distrital.html',context)
+    distrito = Distrito.objects.get(id=id_distrito)
+    total_votantes = Voto.objects.filter(candidato__distrito = distrito).count()
+    padron = distrito.cantidad_votantes
+    porcentaje_votantes = Voto.objects.filter(candidato__distrito = distrito).count()*100/padron
+    candidato = Candidato.objects.filter(distrito=distrito, votos_totales__gt=0)
+    for c in candidato[:1]:
+        ganador = c.nombre
+    return render(request,'distrital.html', {'distrito':distrito, 'padron':padron, 'porcentaje_votantes':porcentaje_votantes, 'total_votantes':total_votantes, 'ganador':ganador})

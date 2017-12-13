@@ -2,12 +2,32 @@
 
 <!-- Deberias escribir el codigo aqui -->
 
-
-<h2>Resultados Por distrito</h2>
-
+<h2>Cantidad de votos {{total}}</h2>
+   <table>
+        <tr>
+            <th>Candidato</th>
+            <th>Distrito</th>
+            <th>Votos</th>
+            <th>Porcentaje</th>
+        </tr>
+        <tr>
+            <th>Votos Nulos</th>
+            <th>-</th>
+            <th>{{votos_nulos}}</th>
+            <th>{{porcentaje_nulos}} %</th>
+        </tr>
+        {% for c in votos_candidatos %}
+        <tr>
+            <th>{{c.nombre}}</th>
+            <th>{{c.distrito}}</th>
+            <th>{{c.votos_totales}}</th>
+            <th>{{c.porcentaje_votos}} %</th>
+        </tr>
+        {% endfor %}
+    </table>
 <!--Si la url esta bien escrita, este codigo es funcional -->
 
+<h2>Resultados Por distrito</h2>
 {% for distrito in distritos %}
-<a href="{% url 'distrito' %}">{{distrito}}</a><br>
-
+	<a href="{% url 'distrital' distrito.id %}"> {{distrito}}</a>
 {% endfor %}
